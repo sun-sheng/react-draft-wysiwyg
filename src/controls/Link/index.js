@@ -116,22 +116,26 @@ class Link extends Component {
     const { editorState, onChange } = this.props;
     const { currentEntity } = this.state;
     let selection = editorState.getSelection();
-    if (currentEntity) {
-      const entityRange = getEntityRange(editorState, currentEntity);
-      const isBackward = selection.getIsBackward();
-      if (isBackward) {
-        selection = selection.merge({
-          anchorOffset: entityRange.end,
-          focusOffset: entityRange.start,
-        });
-      } else {
-        selection = selection.merge({
-          anchorOffset: entityRange.start,
-          focusOffset: entityRange.end,
-        });
+    if (selection.isCollapsed()) {
+      if (currentEntity) {
+        const entityRange = getEntityRange(editorState, currentEntity);
+        const isBackward = selection.getIsBackward();
+        if (isBackward) {
+          selection = selection.merge({
+            anchorOffset: entityRange.end,
+            focusOffset: entityRange.start,
+          });
+        } else {
+          selection = selection.merge({
+            anchorOffset: entityRange.start,
+            focusOffset: entityRange.end,
+          });
+        }
+        onChange(RichUtils.toggleLink(editorState, selection, null));
       }
+    } else {
       onChange(RichUtils.toggleLink(editorState, selection, null));
-    }
+    } 
   };
 
   addLink = (linkTitle, linkTarget, linkTargetOption) => {

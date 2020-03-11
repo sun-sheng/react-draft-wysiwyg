@@ -189,7 +189,6 @@ class LayoutComponent extends Component {
         )}
         {options.indexOf('unlink') >= 0 && (
           <Option
-            disabled={!currentState.link}
             value="ordered-list-item"
             className={classNames(unlink.className)}
             onClick={this.removeLink}
