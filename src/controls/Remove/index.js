@@ -1,10 +1,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EditorState, Modifier } from 'draft-js';
+import { 
+  EditorState,
+  ContentState,
+  ContentBlock,
+  genKey, 
+  Modifier 
+} from 'draft-js';
 import { getSelectionCustomInlineStyle } from 'draftjs-utils';
 
 import { forEach } from '../../utils/common';
 import LayoutComponent from './Component';
+
+const REG_LINES = /[\t\r\n]/
+const DELIMITER_LINE = '\n'
 
 export default class Remove extends Component {
   static propTypes = {
@@ -39,6 +48,34 @@ export default class Remove extends Component {
     });
     this.signalExpanded = false;
   };
+
+  removeStyles = () => {
+    const { editorState, onChange } = this.props;
+    let contentState = editorState.getCurrentContent();
+    const selection = window.getSelection()
+    if (!selection) return editorState
+    let str = selection.toString().replace(REG_LINES, DELIMITER_LINE)
+    let idx = str.indexOf(DELIMITER_LINE)
+    let inlineStr = ''
+    let blockStr = ''
+    if (idx < 0) {
+      inlineStr = str
+    } else {
+      inlineStr = str.substring(0, idx)
+      blockStr = str.substring(idx)
+    }
+    let _line = Modifier.replaceText(contentState, editorState.getSelection(), inlineStr)
+    let state = EditorState.push(editorState, _line, 'insert-characters')
+    if (blockStr) {
+      let _block = Modifier.replaceWithFragment( 
+        state.getCurrentContent(),
+        state.getSelection(),
+        ContentState.createFromText(blockStr).blockMap
+      );
+      state = EditorState.push(state, _block, 'insert-fragment')
+    }
+    onChange(state)
+  }
 
   removeInlineStyles = () => {
     const { editorState, onChange } = this.props;
@@ -105,7 +142,7 @@ export default class Remove extends Component {
         onExpandEvent={this.onExpandEvent}
         doExpand={this.doExpand}
         doCollapse={this.doCollapse}
-        onChange={this.removeInlineStyles}
+        onChange={this.removeStyles}
       />
     );
   }
