@@ -4,6 +4,7 @@ import {
   Editor,
   EditorState,
   RichUtils,
+  KeyBindingUtil,
   convertToRaw,
   convertFromRaw,
   CompositeDecorator,
@@ -137,8 +138,12 @@ class WysiwygEditor extends Component {
   };
 
   keyBindingFn = event => {
+    const { onTab, interceptKeyFn } = this.props;
+    if (interceptKeyFn) {
+      // 如果 interceptKeyFn 返回了 true 则阻止之后的行为
+      if (interceptKeyFn(event)) return null
+    }
     if (event.key === 'Tab') {
-      const { onTab } = this.props;
       if (!onTab || !onTab(event)) {
         const editorState = changeDepth(
           this.state.editorState,
@@ -458,6 +463,7 @@ class WysiwygEditor extends Component {
             onFocus={this.onToolbarFocus}
           >
             {toolbar.options.map((opt, index) => {
+              if (opt === '|' || opt === 'divider') return <div className="rdw-toolbar-divider"/>  
               const Control = Controls[opt];
               const config = toolbar[opt];
               if (opt === 'image' && uploadCallback) {
