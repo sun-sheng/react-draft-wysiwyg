@@ -463,7 +463,7 @@ class WysiwygEditor extends Component {
             onFocus={this.onToolbarFocus}
           >
             {toolbar.options.map((opt, index) => {
-              if (opt === '|' || opt === 'divider') return <div className="rdw-toolbar-divider"/>  
+              if (opt === '|' || opt === 'divider') return <div key={index} className="rdw-toolbar-divider"/>  
               const Control = Controls[opt];
               const config = toolbar[opt];
               if (opt === 'image' && uploadCallback) {
