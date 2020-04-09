@@ -394,9 +394,9 @@ class WysiwygEditor extends Component {
     if (handlePastedTextProp) {
       return handlePastedTextProp(text, html, editorState, this.onChange);
     }
-    if (!stripPastedStyles) {
-      return handlePastedText(text, html, editorState, this.onChange);
-    }
+    // if (!stripPastedStyles) {
+    //   return handlePastedText(text, html, editorState, this.onChange);
+    // }
     return false;
   };
 

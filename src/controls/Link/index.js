@@ -143,46 +143,68 @@ class Link extends Component {
     const { currentEntity } = this.state;
     let selection = editorState.getSelection();
 
-    if (currentEntity) {
-      const entityRange = getEntityRange(editorState, currentEntity);
-      const isBackward = selection.getIsBackward();
-      if (isBackward) {
-        selection = selection.merge({
-          anchorOffset: entityRange.end,
-          focusOffset: entityRange.start,
-        });
-      } else {
-        selection = selection.merge({
-          anchorOffset: entityRange.start,
-          focusOffset: entityRange.end,
-        });
-      }
-    }
-    const entityKey = editorState
-      .getCurrentContent()
-      .createEntity('LINK', 'MUTABLE', {
+    const contentState = editorState.getCurrentContent();
+    const contentStateWithEntity = contentState.createEntity(
+      'LINK',
+      'MUTABLE',
+      {
         url: linkTarget,
         targetOption: linkTargetOption,
-      })
-      .getLastCreatedEntityKey();
+      }
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
 
-    let contentState = Modifier.replaceText(
-      editorState.getCurrentContent(),
-      selection,
-      `${linkTitle}`,
-      undefined,
-      entityKey
-    );
-    let newEditorState = EditorState.push(
-      editorState,
-      contentState,
-      'insert-characters'
-    );
-
-    onChange(
-      EditorState.push(newEditorState, contentState, 'insert-characters')
-    );
+    if (selection.isCollapsed()) {
+      let newContentState = Modifier.insertText(
+        editorState.getCurrentContent(),
+        selection,
+        `${linkTitle}`,
+        undefined,
+        entityKey
+      );
+      let newEditorState = EditorState.push(
+        editorState,
+        newContentState,
+        'insert-characters'
+      );
+      onChange(newEditorState);
+    } else {
+      const newEditorState = EditorState.set(editorState, { currentContent: contentStateWithEntity });
+      onChange(RichUtils.toggleLink(
+        newEditorState,
+        newEditorState.getSelection(),
+        entityKey
+      ));
+    }
+    // 
     this.doCollapse();
+    // 
+    
+    // if (currentEntity) {
+    //   const entityRange = getEntityRange(editorState, currentEntity);
+    //   const isBackward = selection.getIsBackward();
+    //   if (isBackward) {
+    //     selection = selection.merge({
+    //       anchorOffset: entityRange.end,
+    //       focusOffset: entityRange.start,
+    //     });
+    //   } else {
+    //     selection = selection.merge({
+    //       anchorOffset: entityRange.start,
+    //       focusOffset: entityRange.end,
+    //     });
+    //   }
+    // }
+    // const entityKey = editorState
+    //   .getCurrentContent()
+    //   .createEntity('LINK', 'MUTABLE', {
+    //     url: linkTarget,
+    //     targetOption: linkTargetOption,
+    //   })
+    //   .getLastCreatedEntityKey();
+
+    
+    // this.doCollapse();
   };
 
   render() {
