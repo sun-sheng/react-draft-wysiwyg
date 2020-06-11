@@ -181,21 +181,16 @@ class WysiwygEditor extends Component {
 
   onChange = editorState => {
     const { readOnly, onEditorStateChange } = this.props;
-    if (
-      !readOnly &&
-      !(
-        getSelectedBlocksType(editorState) === 'atomic' &&
-        editorState.getSelection().isCollapsed
-      )
-    ) {
-      if (onEditorStateChange) {
-        onEditorStateChange(editorState, this.props.wrapperId);
-      }
-      if (!hasProperty(this.props, 'editorState')) {
-        this.setState({ editorState }, this.afterChange(editorState));
-      } else {
-        this.afterChange(editorState);
-      }
+    if (readOnly) return
+    if (getSelectedBlocksType(editorState) === 'atomic' && editorState.getSelection().isCollapsed) return
+    if (onEditorStateChange) {
+      onEditorStateChange(editorState, this.props.wrapperId);
+    }
+    if (hasProperty(this.props, 'editorState')) {
+      this.afterChange(editorState);
+    } else {
+      console.log('editorState changed')
+      this.setState({ editorState }, this.afterChange(editorState));
     }
   };
 
@@ -242,15 +237,13 @@ class WysiwygEditor extends Component {
   getSuggestions = () => this.props.mention && this.props.mention.suggestions;
 
   afterChange = editorState => {
-    setTimeout(() => {
-      const { onChange, onContentStateChange } = this.props;
-      if (onChange) {
-        onChange(convertToRaw(editorState.getCurrentContent()));
-      }
-      if (onContentStateChange) {
-        onContentStateChange(convertToRaw(editorState.getCurrentContent()));
-      }
-    });
+    const { onChange, onContentStateChange } = this.props;
+    if (onChange) {
+      onChange(editorState);
+    }
+    if (onContentStateChange) {
+      onContentStateChange(editorState);
+    }
   };
 
   isReadOnly = () => this.props.readOnly;
@@ -428,6 +421,7 @@ class WysiwygEditor extends Component {
       wrapperStyle,
       uploadCallback,
       ariaLabel,
+      customControls,
     } = this.props;
 
     const controlProps = {
@@ -464,7 +458,7 @@ class WysiwygEditor extends Component {
           >
             {toolbar.options.map((opt, index) => {
               if (opt === '|' || opt === 'divider') return <div key={index} className="rdw-toolbar-divider"/>  
-              const Control = Controls[opt];
+              const Control = customControls[opt] || Controls[opt];
               const config = toolbar[opt];
               if (opt === 'image' && uploadCallback) {
                 config.uploadCallback = uploadCallback;
@@ -562,6 +556,7 @@ WysiwygEditor.defaultProps = {
   stripPastedStyles: false,
   localization: { locale: 'en', translations: {} },
   customDecorators: [],
+  customControls: {}
 };
 
 export default WysiwygEditor;

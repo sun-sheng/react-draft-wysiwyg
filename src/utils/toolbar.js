@@ -25,6 +25,10 @@ export const mergeRecursive = (obj1, obj2) => {
       mergedValue[key] = obj2[key] !== undefined ? obj2[key] : value;
     }
   });
+  forEach(obj2, (key, value) => {
+    if (mergedValue[key] !== undefined) return
+    mergedValue[key] = value
+  });
   return mergedValue;
 };
 
