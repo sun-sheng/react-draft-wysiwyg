@@ -422,12 +422,14 @@ class WysiwygEditor extends Component {
       uploadCallback,
       ariaLabel,
       customControls,
+      setLock,
     } = this.props;
 
     const controlProps = {
       modalHandler: this.modalHandler,
       editorState,
       onChange: this.onChange,
+      setLock,
       translations: {
         ...localeTranslations[locale || newLocale],
         ...translations,

@@ -204,6 +204,7 @@ function getSuggestionComponent() {
 
     filterSuggestions = props => {
       const mentionText = props.children[0].props.text.substr(1);
+      // config.filterSuggestions(mentionText).then
       const suggestions = config.getSuggestions();
       this.filteredSuggestions =
         suggestions &&
@@ -235,7 +236,7 @@ function getSuggestionComponent() {
     render() {
       const { children } = this.props;
       const { activeOption, showSuggestions } = this.state;
-      const { dropdownClassName, optionClassName } = config;
+      const { dropdownClassName, optionClassName, renderSuggestion } = config;
       return (
         <span
           className="rdw-suggestion-wrapper"
@@ -257,7 +258,7 @@ function getSuggestionComponent() {
               ref={this.setDropdownReference}
             >
               {this.filteredSuggestions.map((suggestion, index) => (
-                <span
+                <div
                   key={index}
                   spellCheck={false}
                   onClick={this.addMention}
@@ -270,8 +271,8 @@ function getSuggestionComponent() {
                     { 'rdw-suggestion-option-active': index === activeOption }
                   )}
                 >
-                  {suggestion.text}
-                </span>
+                  {renderSuggestion(suggestion)}
+                </div>
               ))}
             </span>
           )}
