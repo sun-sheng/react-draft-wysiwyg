@@ -58,3 +58,44 @@ export default function addMention(
   }
   onChange(EditorState.push(newEditorState, contentState, 'insert-characters'));
 }
+
+export function insertMention(
+  editorState: EditorState,
+  suggestion: Object,
+  separator: string,
+  trigger: string,
+): void {
+  const { label } = suggestion;
+  const entityKey = editorState
+    .getCurrentContent()
+    .createEntity('MENTION', 'IMMUTABLE', suggestion)
+    .getLastCreatedEntityKey();
+
+  let selection = editorState.getSelection();
+  
+  const text = `${trigger}${label}`
+  let contentState = Modifier.insertText(
+    editorState.getCurrentContent(),
+    selection,
+    text,
+    undefined,
+    entityKey
+  );
+  let newEditorState = EditorState.push(editorState, contentState, 'insert-characters')
+  // add empty space
+  selection = newEditorState.getSelection().merge({
+    anchorOffset: selection.get('anchorOffset') + text.length,
+    focusOffset: selection.get('anchorOffset') + text.length,
+  });
+  newEditorState = EditorState.acceptSelection(newEditorState, selection);
+  contentState = Modifier.insertText(
+    newEditorState.getCurrentContent(),
+    selection,
+    ' ',
+    newEditorState.getCurrentInlineStyle(),
+    undefined
+  );
+  
+  return EditorState.push(newEditorState, contentState, 'insert-characters');
+
+}

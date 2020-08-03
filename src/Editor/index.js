@@ -30,6 +30,7 @@ import { handlePastedText } from '../utils/handlePaste';
 import Controls from '../controls';
 import getLinkDecorator from '../decorators/Link';
 import getMentionDecorators from '../decorators/Mention';
+import { insertMention } from '../decorators/Mention/addMention';
 import getHashtagDecorator from '../decorators/HashTag';
 import getBlockRenderFunc from '../renderer';
 import defaultToolbar from '../config/defaultToolbar';
@@ -342,6 +343,21 @@ class WysiwygEditor extends Component {
     editorState = EditorState.moveSelectionToEnd(editorState);
     return editorState;
   };
+
+  focus() {
+    setTimeout(() => {
+      this.editor.focus();
+    });
+  }
+
+  insertMention(suggestion) {
+    this.editor.focus();
+    setTimeout(() => {
+      const { editorState } = this.state
+      const { separator, trigger } = this.props.mention
+      this.onChange(insertMention(editorState, suggestion, separator, trigger))
+    })
+  }
 
   focusEditor = () => {
     setTimeout(() => {

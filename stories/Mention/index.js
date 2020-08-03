@@ -1,6 +1,6 @@
 /* @flow */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Editor } from '../../src';
 
 /**
@@ -20,10 +20,15 @@ const data = [
   { label: '我们', value: 'honeydew', url: 'honeydew' },
 ]
 
-const Mention = () =>
-(<div className="rdw-storybook-root">
+const Mention = () => {
+  const editorRef = useRef()
+  return (<div className="rdw-storybook-root">
   <span>Type @ to see suggestions</span>
+  <div onClick={() => editorRef.current.insertMention(data[0])}>
+  addMention
+  </div>
   <Editor
+    ref={editorRef}
     mention={{
       separator: ' ',
       trigger: '@',
@@ -34,7 +39,7 @@ const Mention = () =>
           setTimeout(function () {
             if (!keyword) return resolve(data) 
             resolve(data.filter(item => item.label.indexOf(keyword.toUpperCase()) !== -1))  
-          }, 1200)
+          })
         })
       },
       renderSuggestion: (sug) => {
@@ -49,6 +54,8 @@ const Mention = () =>
     wrapperClassName="rdw-storybook-wrapper"
     editorClassName="rdw-storybook-editor"
   />
-</div>);
+</div>)
+}
+;
 
 export default Mention;
