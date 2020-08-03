@@ -19,6 +19,11 @@ class Suggestion {
       dropdownClassName,
       optionClassName,
       modalHandler,
+      remote,
+      filterSuggestions,
+      renderSuggestion,
+      notFoundContent,
+      dropdownStyle,
     } = config;
     this.config = {
       separator,
@@ -31,6 +36,11 @@ class Suggestion {
       dropdownClassName,
       optionClassName,
       modalHandler,
+      remote,
+      filterSuggestions,
+      renderSuggestion,
+      notFoundContent,
+      dropdownStyle,
     };
   }
 
@@ -40,6 +50,7 @@ class Suggestion {
         separator,
         trigger,
         getSuggestions,
+        filterSuggestions,
         getEditorState,
       } = this.config;
       const selection = getEditorState().getSelection();
@@ -61,23 +72,7 @@ class Suggestion {
           preText = trigger;
         }
         if (index >= 0) {
-          const mentionText = text.substr(index + preText.length, text.length);
-          const suggestionPresent = getSuggestions().some(suggestion => {
-            if (suggestion.value) {
-              if (this.config.caseSensitive) {
-                return suggestion.value.indexOf(mentionText) >= 0;
-              }
-              return (
-                suggestion.value
-                  .toLowerCase()
-                  .indexOf(mentionText && mentionText.toLowerCase()) >= 0
-              );
-            }
-            return false;
-          });
-          if (suggestionPresent) {
-            callback(index === 0 ? 0 : index + 1, text.length);
-          }
+          callback(index === 0 ? 0 : index + 1, text.length);
         }
       }
     }
@@ -99,43 +94,44 @@ function getSuggestionComponent() {
     };
 
     state = {
-      style: { left: 15 },
+      style: { left: 0 },
       activeOption: -1,
       showSuggestions: true,
+      suggestions: []
     };
 
     componentDidMount() {
-      const editorRect = config.getWrapperRef().getBoundingClientRect();
-      const suggestionRect = this.suggestion.getBoundingClientRect();
-      const dropdownRect = this.dropdown.getBoundingClientRect();
-      let left;
-      let right;
-      let bottom;
-      if (
-        editorRect.width <
-        suggestionRect.left - editorRect.left + dropdownRect.width
-      ) {
-        right = 15;
-      } else {
-        left = 15;
-      }
-      if (editorRect.bottom < dropdownRect.bottom) {
-        bottom = 0;
-      }
-      this.setState({
-        // eslint-disable-line react/no-did-mount-set-state
-        style: { left, right, bottom },
-      });
+      // const editorRect = config.getWrapperRef().getBoundingClientRect();
+      // const suggestionRect = this.suggestion.getBoundingClientRect();
+      // const dropdownRect = this.dropdown.getBoundingClientRect();
+      // let left;
+      // let right;
+      // let bottom;
+      // if (
+      //   editorRect.width <
+      //   suggestionRect.left - editorRect.left + dropdownRect.width
+      // ) {
+      //   right = 15;
+      // } else {
+      //   left = 15;
+      // }
+      // if (editorRect.bottom < dropdownRect.bottom) {
+      //   bottom = 0;
+      // }
+      // this.setState({
+      //   // eslint-disable-line react/no-did-mount-set-state
+      //   style: { bottom },
+      // });
       KeyDownHandler.registerCallBack(this.onEditorKeyDown);
       SuggestionHandler.open();
       config.modalHandler.setSuggestionCallback(this.closeSuggestionDropdown);
-      this.filterSuggestions(this.props);
+      this.filterSuggestions();
     }
 
     componentDidUpdate(props) {
       const { children } = this.props;
       if (children !== props.children) {
-        this.filterSuggestions(props);
+        this.filterSuggestions();
         this.setState({
           showSuggestions: true,
         });
@@ -149,18 +145,18 @@ function getSuggestionComponent() {
     }
 
     onEditorKeyDown = event => {
-      const { activeOption } = this.state;
+      const { activeOption, suggestions } = this.state;
       const newState = {};
       if (event.key === 'ArrowDown') {
         event.preventDefault();
-        if (activeOption === this.filteredSuggestions.length - 1) {
+        if (activeOption === suggestions.length - 1) {
           newState.activeOption = 0;
         } else {
           newState.activeOption = activeOption + 1;
         }
       } else if (event.key === 'ArrowUp') {
         if (activeOption <= 0) {
-          newState.activeOption = this.filteredSuggestions.length - 1;
+          newState.activeOption = suggestions.length - 1;
         } else {
           newState.activeOption = activeOption - 1;
         }
@@ -202,32 +198,21 @@ function getSuggestionComponent() {
 
     filteredSuggestions = [];
 
-    filterSuggestions = props => {
-      const mentionText = props.children[0].props.text.substr(1);
-      // config.filterSuggestions(mentionText).then
-      const suggestions = config.getSuggestions();
-      this.filteredSuggestions =
-        suggestions &&
-        suggestions.filter(suggestion => {
-          if (!mentionText || mentionText.length === 0) {
-            return true;
-          }
-          if (config.caseSensitive) {
-            return suggestion.value.indexOf(mentionText) >= 0;
-          }
-          return (
-            suggestion.value
-              .toLowerCase()
-              .indexOf(mentionText && mentionText.toLowerCase()) >= 0
-          );
-        });
+    filterSuggestions() {
+      const mentionText = this.props.children[0].props.text.substr(1);
+      config.filterSuggestions(mentionText).then(suggestions => {
+        this.setState({ suggestions })
+      })
     };
 
-    addMention = () => {
-      const { activeOption } = this.state;
+    addMention = (index) => {
+      let { activeOption, suggestions } = this.state;
+      if (index !== undefined) {
+        activeOption = index
+      }
       const editorState = config.getEditorState();
       const { onChange, separator, trigger } = config;
-      const selectedMention = this.filteredSuggestions[activeOption];
+      const selectedMention = suggestions[activeOption];
       if (selectedMention) {
         addMention(editorState, onChange, separator, trigger, selectedMention);
       }
@@ -235,8 +220,28 @@ function getSuggestionComponent() {
 
     render() {
       const { children } = this.props;
-      const { activeOption, showSuggestions } = this.state;
-      const { dropdownClassName, optionClassName, renderSuggestion } = config;
+      const { activeOption, showSuggestions, suggestions } = this.state;
+      const { dropdownClassName, dropdownStyle, optionClassName, renderSuggestion, notFoundContent } = config;
+      let content = notFoundContent
+      if (suggestions.length) {
+        content = suggestions.map((suggestion, index) => (
+          <div
+            key={suggestion.value}
+            spellCheck={false}
+            onClick={() => this.addMention(index)}
+            data-index={index}
+            onMouseEnter={this.onOptionMouseEnter}
+            onMouseLeave={this.onOptionMouseLeave}
+            className={classNames(
+              'rdw-suggestion-option',
+              optionClassName,
+              { 'rdw-suggestion-option-active': index === activeOption }
+            )}
+          >
+            {renderSuggestion(suggestion)}
+          </div>
+        ))
+      }
       return (
         <span
           className="rdw-suggestion-wrapper"
@@ -254,31 +259,17 @@ function getSuggestionComponent() {
               )}
               contentEditable="false"
               suppressContentEditableWarning
-              style={this.state.style}
+              style={dropdownStyle}
               ref={this.setDropdownReference}
             >
-              {this.filteredSuggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  spellCheck={false}
-                  onClick={this.addMention}
-                  data-index={index}
-                  onMouseEnter={this.onOptionMouseEnter}
-                  onMouseLeave={this.onOptionMouseLeave}
-                  className={classNames(
-                    'rdw-suggestion-option',
-                    optionClassName,
-                    { 'rdw-suggestion-option-active': index === activeOption }
-                  )}
-                >
-                  {renderSuggestion(suggestion)}
-                </div>
-              ))}
+              {content}
             </span>
           )}
         </span>
       );
     }
+
+
   };
 }
 
