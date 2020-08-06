@@ -24,6 +24,8 @@ class Suggestion {
       renderSuggestion,
       notFoundContent,
       dropdownStyle,
+      renderDropdown,
+      dropdownProps,
     } = config;
     this.config = {
       separator,
@@ -41,6 +43,8 @@ class Suggestion {
       renderSuggestion,
       notFoundContent,
       dropdownStyle,
+      renderDropdown,
+      dropdownProps,
     };
   }
 
@@ -221,7 +225,7 @@ function getSuggestionComponent() {
     render() {
       const { children } = this.props;
       const { activeOption, showSuggestions, suggestions } = this.state;
-      const { dropdownClassName, dropdownStyle, optionClassName, renderSuggestion, notFoundContent } = config;
+      const { dropdownClassName, dropdownStyle, optionClassName, renderSuggestion, notFoundContent, renderDropdown, dropdownProps } = config;
       let content = notFoundContent
       if (suggestions.length) {
         content = suggestions.map((suggestion, index) => (
@@ -242,16 +246,19 @@ function getSuggestionComponent() {
           </div>
         ))
       }
-      return (
-        <span
-          className="rdw-suggestion-wrapper"
-          ref={this.setSuggestionReference}
-          onClick={config.modalHandler.onSuggestionClick}
-          aria-haspopup="true"
-          aria-label="rdw-suggestion-popup"
-        >
-          <span>{children}</span>
-          {showSuggestions && (
+      let _inner = <span>{children}</span>
+      if (showSuggestions) {
+        if (renderDropdown) {
+          dropdownProps.children = <span>{children}</span>
+          dropdownProps.overlay = (
+            <div className="tz-editor-mention-dropdown">
+              {content}
+            </div>
+          )
+          _inner = renderDropdown(dropdownProps)  
+        } else {
+          _inner = [
+            <span>{children}</span>,
             <span
               className={classNames(
                 'rdw-suggestion-dropdown',
@@ -263,8 +270,20 @@ function getSuggestionComponent() {
               ref={this.setDropdownReference}
             >
               {content}
-            </span>
-          )}
+            </span>  
+          ]
+        }    
+      }
+      
+      return (
+        <span
+          className="rdw-suggestion-wrapper"
+          ref={this.setSuggestionReference}
+          onClick={config.modalHandler.onSuggestionClick}
+          aria-haspopup="true"
+          aria-label="rdw-suggestion-popup"
+        >
+          {_inner}
         </span>
       );
     }
