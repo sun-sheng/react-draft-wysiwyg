@@ -18,13 +18,19 @@ const data = [
   { label: 'FIG', value: 'fig', url: 'fig' },
   { label: '我的', value: 'grapefruit', url: 'grapefruit' },
   { label: '我们', value: 'honeydew', url: 'honeydew' },
+  { label: 'nisdf', value: '12', url: 'grapefruit' },
+  { label: 'sfasdfs', value: '234', url: 'honeydew' },
+  { label: 'werwer', value: 'asf', url: 'grapefruit' },
+  { label: 'sdfsd', value: 'asd', url: 'honeydew' },
+  { label: 'sfsdf', value: 'sdf', url: 'grapefruit' },
+  { label: '我234234们', value: 'dfs', url: 'honeydew' },
 ]
 
 const Mention = () => {
   const editorRef = useRef()
   return (<div className="rdw-storybook-root">
   <span>Type @ to see suggestions</span>
-  <div onClick={() => editorRef.current.insertMention(data[0])}>
+  <div onClick={() => editorRef.current.addMention(data[0])}>
   addMention
   </div>
   <Editor

@@ -258,8 +258,9 @@ function getSuggestionComponent() {
           _inner = renderDropdown(dropdownProps)  
         } else {
           _inner = [
-            <span>{children}</span>,
+            <span key="dropdown-child">{children}</span>,
             <span
+              key="dropdown-popup"
               className={classNames(
                 'rdw-suggestion-dropdown',
                 dropdownClassName

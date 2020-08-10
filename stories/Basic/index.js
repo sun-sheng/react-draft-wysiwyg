@@ -14,10 +14,10 @@ function interceptKeyFn(event) {
 
 const Basic = () => (<div className="rdw-storybook-root">
   <Editor
+    max={10}
     toolbarClassName="rdw-storybook-toolbar"
     wrapperClassName="rdw-storybook-wrapper"
     editorClassName="rdw-storybook-editor"
-    interceptKeyFn={interceptKeyFn}
   />
 </div>);
 

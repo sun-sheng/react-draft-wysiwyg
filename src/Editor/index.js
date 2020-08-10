@@ -30,13 +30,22 @@ import { handlePastedText } from '../utils/handlePaste';
 import Controls from '../controls';
 import getLinkDecorator from '../decorators/Link';
 import getMentionDecorators from '../decorators/Mention';
-import { insertMention } from '../decorators/Mention/addMention';
+import addMention, { insertMention } from '../decorators/Mention/addMention';
 import getHashtagDecorator from '../decorators/HashTag';
 import getBlockRenderFunc from '../renderer';
 import defaultToolbar from '../config/defaultToolbar';
 import localeTranslations from '../i18n';
 import './styles.css';
 import '../../css/Draft.css';
+
+function getRawLength(raw) {
+  const { blocks } = raw
+  let text = ''
+  blocks.forEach((block) => {
+    text += block.text
+  }) 
+  return text.replace(/[\n\s]/g, '').length
+}
 
 class WysiwygEditor extends Component {
   constructor(props) {
@@ -139,7 +148,18 @@ class WysiwygEditor extends Component {
   };
 
   keyBindingFn = event => {
-    const { onTab, interceptKeyFn } = this.props;
+    const { onTab, interceptKeyFn, max } = this.props;
+    // if (max) {
+    //   const _raw = convertToRaw(this.state.editorState.getCurrentContent())
+    //   if (getRawLength(_raw) >= max) {
+    //     // 如果不是回退键的话，不允许输入
+    //     if (event.keyCode !== 8) {
+    //       event.preventDefault();
+    //       event.stopPropagation();
+    //       return null
+    //     }
+    //   }
+    // }
     if (interceptKeyFn) {
       // 如果 interceptKeyFn 返回了 true 则阻止之后的行为
       if (interceptKeyFn(event)) return null
@@ -181,7 +201,11 @@ class WysiwygEditor extends Component {
   };
 
   onChange = editorState => {
-    const { readOnly, onEditorStateChange } = this.props;
+    const { readOnly, onEditorStateChange, max } = this.props;
+    // if (max) {
+    //   const _raw = convertToRaw(editorState.getCurrentContent())
+    //   if (getRawLength(_raw) > max) return console.log('超出长度')
+    // }
     if (readOnly) return
     if (getSelectedBlocksType(editorState) === 'atomic' && editorState.getSelection().isCollapsed) return
     if (onEditorStateChange) {
@@ -194,6 +218,10 @@ class WysiwygEditor extends Component {
       this.setState({ editorState }, this.afterChange(editorState));
     }
   };
+
+  clear() {
+    this.onChange(EditorState.createEmpty(this.compositeDecorator))
+  }
 
   setWrapperReference = ref => {
     this.wrapper = ref;
@@ -217,6 +245,7 @@ class WysiwygEditor extends Component {
       decorators.push(
         ...getMentionDecorators({
           ...this.props.mention,
+          filterSuggestions: this.filterSuggestions,
           onChange: this.onChange,
           getEditorState: this.getEditorState,
           getSuggestions: this.getSuggestions,
@@ -235,6 +264,8 @@ class WysiwygEditor extends Component {
 
   getEditorState = () => this.state.editorState;
 
+  filterSuggestions = (key) => this.props.mention.filterSuggestions(key);
+  
   getSuggestions = () => this.props.mention && this.props.mention.suggestions;
 
   afterChange = editorState => {
@@ -348,6 +379,12 @@ class WysiwygEditor extends Component {
     setTimeout(() => {
       this.editor.focus();
     });
+  }
+
+  addMention(suggestion) {
+    const { editorState } = this.state
+    const { separator, trigger } = this.props.mention
+    addMention(editorState, this.onChange, separator, trigger, suggestion)
   }
 
   insertMention(suggestion) {
