@@ -208,13 +208,15 @@ class WysiwygEditor extends Component {
     // }
     if (readOnly) return
     if (getSelectedBlocksType(editorState) === 'atomic' && editorState.getSelection().isCollapsed) return
+    
+    console.log('editorState changed')
+
     if (onEditorStateChange) {
       onEditorStateChange(editorState, this.props.wrapperId);
     }
     if (hasProperty(this.props, 'editorState')) {
       this.afterChange(editorState);
     } else {
-      console.log('editorState changed')
       this.setState({ editorState }, this.afterChange(editorState));
     }
   };

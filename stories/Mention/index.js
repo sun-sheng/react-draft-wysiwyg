@@ -14,7 +14,7 @@ const data = [
   { label: 'BANANA', value: 'banana', url: 'banana' },
   { label: 'CHERRY', value: 'cherry', url: 'cherry' },
   { label: 'DURIAN', value: 'durian', url: 'durian' },
-  { label: 'EGGFRUIT', value: 'eggfruit', url: 'eggfruit' },
+  { label: 'EGGFRUIT-EGGFRUIT', value: 'eggfruit', url: 'eggfruit' },
   { label: 'FIG', value: 'fig', url: 'fig' },
   { label: '我的', value: 'grapefruit', url: 'grapefruit' },
   { label: '我们', value: 'honeydew', url: 'honeydew' },
@@ -28,9 +28,14 @@ const data = [
 
 const Mention = () => {
   const editorRef = useRef()
+  function addMention(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    editorRef.current.addMention(data[0]);
+  }
   return (<div className="rdw-storybook-root">
   <span>Type @ to see suggestions</span>
-  <div onClick={() => editorRef.current.addMention(data[0])}>
+  <div onMouseDown={addMention}>
   addMention
   </div>
   <Editor

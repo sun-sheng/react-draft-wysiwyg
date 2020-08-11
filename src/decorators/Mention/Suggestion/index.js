@@ -222,6 +222,13 @@ function getSuggestionComponent() {
       }
     };
 
+    handleSuggestionClick = (event) => {
+      const index = parseInt(event.currentTarget.getAttribute('data-index'))
+      event.preventDefault();
+      event.stopPropagation();
+      this.addMention(index)
+    }
+
     render() {
       const { children } = this.props;
       const { activeOption, showSuggestions, suggestions } = this.state;
@@ -232,7 +239,7 @@ function getSuggestionComponent() {
           <div
             key={suggestion.value}
             spellCheck={false}
-            onClick={() => this.addMention(index)}
+            onMouseDown={this.handleSuggestionClick}
             data-index={index}
             onMouseEnter={this.onOptionMouseEnter}
             onMouseLeave={this.onOptionMouseLeave}
