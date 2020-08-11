@@ -262,6 +262,7 @@ function getSuggestionComponent() {
               {content}
             </div>
           )
+          dropdownProps.visible = true
           _inner = renderDropdown(dropdownProps)  
         } else {
           _inner = [
