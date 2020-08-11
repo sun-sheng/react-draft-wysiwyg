@@ -2,16 +2,15 @@
   position: relative;
 }
 .rdw-suggestion-dropdown {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
   border: 1px solid #F1F1F1;
-  min-width: 100px;
-  max-height: 150px;
+  min-width: 120px;
+  max-height: 300px;
   overflow: auto;
-  background: white;
-  left: 0;
-  z-index: 100;
+  background: #fff;
+}
+
+.tz-rdw-editor-mention-popup {
+  position: fixed;
 }
 
 .rdw-suggestion-option {

@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import addMention from '../addMention';
 import KeyDownHandler from '../../../event-handler/keyDown';
 import SuggestionHandler from '../../../event-handler/suggestions';
+import Dropdown from './dropdown';
 import './styles.css';
 
 class Suggestion {
@@ -265,22 +266,38 @@ function getSuggestionComponent() {
           dropdownProps.visible = true
           _inner = renderDropdown(dropdownProps)  
         } else {
-          _inner = [
-            <span key="dropdown-child">{children}</span>,
-            <span
-              key="dropdown-popup"
-              className={classNames(
-                'rdw-suggestion-dropdown',
-                dropdownClassName
-              )}
-              contentEditable="false"
-              suppressContentEditableWarning
-              style={dropdownStyle}
-              ref={this.setDropdownReference}
-            >
-              {content}
-            </span>  
-          ]
+          const _dp = { 
+            children, 
+            popup: (
+              <div
+                key="dropdown-popup"
+                className={classNames(
+                  'rdw-suggestion-dropdown',
+                  dropdownClassName
+                )}
+                style={dropdownStyle}
+              >
+                {content}
+              </div>
+            )
+          }
+          _inner = <Dropdown {..._dp}/>
+          // _inner = [
+          //   <span key="dropdown-child">{children}</span>,
+          //   <span
+          //     key="dropdown-popup"
+          //     className={classNames(
+          //       'rdw-suggestion-dropdown',
+          //       dropdownClassName
+          //     )}
+          //     contentEditable="false"
+          //     suppressContentEditableWarning
+          //     style={dropdownStyle}
+          //     ref={this.setDropdownReference}
+          //   >
+          //     {content}
+          //   </span>  
+          // ]
         }    
       }
       
