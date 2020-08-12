@@ -1,6 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 
+function getWindowHeight() {
+  return Math.max(
+    document.documentElement.clientHeight, 
+    window.innerHeight
+  );
+}
+
+
 export default class Dropdown extends React.Component {
 
   rootRef = React.createRef()
@@ -16,7 +24,7 @@ export default class Dropdown extends React.Component {
     if (placement === 'bottom') {
       this._popup.style.top = `${top + height}px`
     } else {
-      this._popup.style.bottom = `${document.body.clientHeight - top}px`
+      this._popup.style.bottom = `${getWindowHeight() - top}px`
     }
     document.body.appendChild(this._popup)
     this.renderPopup()

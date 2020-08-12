@@ -19,7 +19,7 @@ export default function addMention(
   const selectedBlock = getSelectedBlock(editorState);
   const selectedBlockText = selectedBlock.getText();
   let focusOffset = editorState.getSelection().focusOffset;
-  const mentionIndex = (selectedBlockText.lastIndexOf(separator + trigger, focusOffset) || 0) + 1;
+  const mentionIndex = (selectedBlockText.lastIndexOf(separator + trigger, focusOffset) || 0) + separator.length;
   let spaceAlreadyPresent = false;
   if (selectedBlockText.length === mentionIndex + 1) {
     focusOffset = selectedBlockText.length;

@@ -41,7 +41,7 @@ const Mention = () => {
   <Editor
     ref={editorRef}
     mention={{
-      separator: ' ',
+      separator: '',
       trigger: '@',
       remote: true,
       filterSuggestions: (keyword) => {

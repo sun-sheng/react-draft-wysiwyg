@@ -77,7 +77,7 @@ class Suggestion {
           preText = trigger;
         }
         if (index >= 0) {
-          callback(index === 0 ? 0 : index + 1, text.length);
+          callback(index === 0 ? 0 : index + separator.length, text.length);
         }
       }
     }
