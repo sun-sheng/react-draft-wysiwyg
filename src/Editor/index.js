@@ -264,7 +264,7 @@ class WysiwygEditor extends Component {
 
   getWrapperRef = () => this.wrapper;
 
-  getEditorState = () => this.state.editorState;
+  getEditorState = () => this.state ? this.state.editorState : null;
 
   filterSuggestions = (key) => this.props.mention.filterSuggestions(key);
   

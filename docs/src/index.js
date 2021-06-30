@@ -3,6 +3,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, IndexRoute, Route, hashHistory } from 'react-router';
+import "../css/carbon.css"; // eslint-disable-line no-unused-vars
 import '../css/fonts.css'; // eslint-disable-line no-unused-vars
 import '../css/normalize.css'; // eslint-disable-line no-unused-vars
 import {
